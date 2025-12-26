@@ -25,7 +25,9 @@ export interface Store {
   id: number;
   store_name: string;
   market_id: number | null;
-  created_at: string;
+  manager_id: number | null;  // ← ADD THIS LINE
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface MarketManagerStore {

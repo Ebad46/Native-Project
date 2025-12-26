@@ -1,4 +1,4 @@
-// src/components/NotificationSystem.tsx
+
 
 import React, { useState, useRef, useEffect } from 'react';
 import {
@@ -10,6 +10,7 @@ import {
   SafeAreaView,
   Animated,
 } from 'react-native';
+import Toast from 'react-native-toast-message';
 
 export type ToastType = 'success' | 'error' | 'info' | 'warning';
 
@@ -29,18 +30,16 @@ export interface ConfirmOptions {
   isDangerous?: boolean;
 }
 
-let toastManager: {
-  show: (message: string, type: ToastType, duration?: number) => void;
-} | null = null;
-
 let confirmManager: {
   show: (options: ConfirmOptions) => void;
 } | null = null;
 
 export const showToast = (message: string, type: ToastType = 'info', duration: number = 3000) => {
-  if (toastManager) {
-    toastManager.show(message, type, duration);
-  }
+  Toast.show({
+    type: type === 'error' ? 'error' : type === 'success' ? 'success' : 'info',
+    text1: message,
+    visibilityTime: duration,
+  });
 };
 
 export const showConfirm = (options: ConfirmOptions) => {
@@ -50,92 +49,8 @@ export const showConfirm = (options: ConfirmOptions) => {
 };
 
 // Toast Component
-export const ToastContainer: React.FC = () => {
-  const [toasts, setToasts] = useState<ToastMessage[]>([]);
-
-  useEffect(() => {
-    toastManager = {
-      show: (message: string, type: ToastType, duration: number = 3000) => {
-        const id = Date.now().toString();
-        const newToast: ToastMessage = { id, message, type, duration };
-        setToasts((prev) => [...prev, newToast]);
-
-        if (duration > 0) {
-          setTimeout(() => {
-            setToasts((prev) => prev.filter((t) => t.id !== id));
-          }, duration);
-        }
-      },
-    };
-
-    return () => {
-      toastManager = null;
-    };
-  }, []);
-
-  return (
-    <View style={styles.toastContainer}>
-      {toasts.map((toast) => (
-        <ToastItem
-          key={toast.id}
-          message={toast.message}
-          type={toast.type}
-          onClose={() => setToasts((prev) => prev.filter((t) => t.id !== toast.id))}
-        />
-      ))}
-    </View>
-  );
-};
-
-const ToastItem: React.FC<{
-  message: string;
-  type: ToastType;
-  onClose: () => void;
-}> = ({ message, type, onClose }) => {
-  const opacity = useRef(new Animated.Value(1)).current;
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      Animated.timing(opacity, {
-        toValue: 0,
-        duration: 300,
-        useNativeDriver: true,
-      }).start(() => onClose());
-    }, 2700);
-
-    return () => clearTimeout(timer);
-  }, [opacity, onClose]);
-
-  const getStyles = () => {
-    switch (type) {
-      case 'success':
-        return { backgroundColor: '#10b981', icon: '✓' };
-      case 'error':
-        return { backgroundColor: '#ef4444', icon: '✕' };
-      case 'warning':
-        return { backgroundColor: '#f59e0b', icon: '!' };
-      default:
-        return { backgroundColor: '#3b82f6', icon: 'ℹ' };
-    }
-  };
-
-  const { backgroundColor, icon } = getStyles();
-
-  return (
-    <Animated.View
-      style={[
-        styles.toast,
-        { backgroundColor, opacity },
-      ]}
-    >
-      <Text style={styles.toastIcon}>{icon}</Text>
-      <Text style={styles.toastMessage}>{message}</Text>
-      <TouchableOpacity onPress={onClose} style={styles.toastClose}>
-        <Text style={styles.toastCloseText}>✕</Text>
-      </TouchableOpacity>
-    </Animated.View>
-  );
-};
+// Note: Toasts are delegated to `react-native-toast-message`.
+// You must include `<Toast />` in your app root (App.tsx) — App.tsx already mounts it.
 
 // Confirmation Modal Component
 export const ConfirmationModal: React.FC = () => {

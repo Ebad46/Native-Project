@@ -100,6 +100,40 @@ export const marketService = {
 
 // Stores
 export const storeService = {
+  // In storeService - ADD THIS NEW FUNCTION:
+
+async updateWithManager(
+  id: number,
+  store_name: string,
+  market_id: number | null,
+  manager_id: number | null
+): Promise<Store | null> {
+  try {
+    console.log('📝 Updating store:', { id, store_name, market_id, manager_id });
+    
+    const { data, error } = await supabase
+      .from('stores')
+      .update({ 
+        store_name, 
+        market_id,
+        manager_id
+      })
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('❌ Error updating store:', error);
+      return null;
+    }
+    
+    console.log('✅ Store updated:', data);
+    return (data as Store) || null;
+  } catch (err) {
+    console.error('❌ Store update error:', err);
+    return null;
+  }
+},
   async getAll(): Promise<Store[]> {
     try {
       const { data, error } = await supabase.from('stores').select('*');
@@ -114,11 +148,22 @@ export const storeService = {
     }
   },
 
-  async create(store_name: string, market_id: number | null): Promise<Store | null> {
+  async create(
+    store_name: string,
+    market_id: number | null,
+    id?: number | null
+  ): Promise<Store | null> {
     try {
+      const insertData: any = { store_name, market_id };
+
+      // Only add ID if provided
+      if (id) {
+        insertData.id = id;
+      }
+
       const { data, error } = await supabase
         .from('stores')
-        .insert([{ store_name, market_id }])
+        .insert([insertData])
         .select()
         .single();
 
@@ -242,7 +287,7 @@ export const managerService = {
   ): Promise<MarketManager | null> {
     try {
       const updateData: any = { name, email, market_id };
-      
+
       // Only include password if provided
       if (password) {
         updateData.password = password;
@@ -357,7 +402,7 @@ export const assignmentService = {
       return null;
     }
   },
-
+  
   async unassign(manager_id: number, store_id: number): Promise<boolean> {
     try {
       const { error } = await supabase
