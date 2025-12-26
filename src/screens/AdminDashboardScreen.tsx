@@ -1,4 +1,4 @@
-// src/screens/AdminDashboardScreen.tsx (WITH EDIT FUNCTIONALITY)
+// src/screens/AdminDashboardScreen.tsx (WITH PASSWORD FIX)
 
 import React, { useState, useEffect } from 'react';
 import {
@@ -135,8 +135,8 @@ export const AdminDashboardScreen: React.FC = () => {
       const newManager = await managerService.create(
         managerName,
         managerEmail,
-        managerMarket,
-        managerPassword
+        managerPassword,
+        managerMarket
       );
       if (newManager) {
         showToast(`Manager "${managerName}" created!`, 'success');
@@ -158,7 +158,7 @@ export const AdminDashboardScreen: React.FC = () => {
     setManagerName(manager.name);
     setManagerEmail(manager.email);
     setManagerMarket(manager.market_id);
-    setManagerPassword(''); // Don't show password
+    setManagerPassword('');
     setEditManagerModalVisible(true);
   };
 
@@ -174,6 +174,7 @@ export const AdminDashboardScreen: React.FC = () => {
         editingManager.id,
         managerName,
         managerEmail,
+        managerPassword !== '' ? managerPassword : undefined,
         managerMarket
       );
       if (success) {
@@ -182,6 +183,7 @@ export const AdminDashboardScreen: React.FC = () => {
         setEditManagerModalVisible(false);
         setManagerName('');
         setManagerEmail('');
+        setManagerPassword('');
         setManagerMarket(null);
         await loadData();
       } else {
@@ -818,6 +820,18 @@ export const AdminDashboardScreen: React.FC = () => {
                 value={managerEmail}
                 onChangeText={setManagerEmail}
                 placeholderTextColor="#999"
+              />
+            </View>
+
+            <View style={styles.formGroup}>
+              <Text style={styles.label}>Password (Leave empty to keep current)</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Enter new password"
+                value={managerPassword}
+                onChangeText={setManagerPassword}
+                placeholderTextColor="#999"
+                secureTextEntry
               />
             </View>
 

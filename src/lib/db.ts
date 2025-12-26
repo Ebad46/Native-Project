@@ -57,6 +57,26 @@ export const marketService = {
     }
   },
 
+  async update(id: number, name: string): Promise<Market | null> {
+    try {
+      const { data, error } = await supabase
+        .from('markets')
+        .update({ name })
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error updating market:', error);
+        return null;
+      }
+      return (data as Market) || null;
+    } catch (err) {
+      console.error('Market update error:', err);
+      return null;
+    }
+  },
+
   async delete(id: number): Promise<boolean> {
     try {
       console.log('Deleting market:', id);
@@ -189,11 +209,16 @@ export const managerService = {
     }
   },
 
-  async create(name: string, email: string, market_id: number | null): Promise<MarketManager | null> {
+  async create(
+    name: string,
+    email: string,
+    password: string,
+    market_id: number | null
+  ): Promise<MarketManager | null> {
     try {
       const { data, error } = await supabase
         .from('market_managers')
-        .insert([{ name, email, market_id }])
+        .insert([{ name, email, password, market_id }])
         .select()
         .single();
 
@@ -208,11 +233,24 @@ export const managerService = {
     }
   },
 
-  async update(id: number, name: string, email: string, market_id: number | null): Promise<MarketManager | null> {
+  async update(
+    id: number,
+    name: string,
+    email: string,
+    password?: string,
+    market_id?: number | null
+  ): Promise<MarketManager | null> {
     try {
+      const updateData: any = { name, email, market_id };
+      
+      // Only include password if provided
+      if (password) {
+        updateData.password = password;
+      }
+
       const { data, error } = await supabase
         .from('market_managers')
-        .update({ name, email, market_id })
+        .update(updateData)
         .eq('id', id)
         .select()
         .single();
