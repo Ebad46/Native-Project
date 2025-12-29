@@ -21,6 +21,7 @@ export const ManagersTab: React.FC<ManagersTabProps> = ({
   onAdd,
   onEdit,
   onDelete,
+  onRefresh, // added
 }) => {
   const [addModalVisible, setAddModalVisible] = useState(false);
   const [editModalVisible, setEditModalVisible] = useState(false);
@@ -38,6 +39,43 @@ export const ManagersTab: React.FC<ManagersTabProps> = ({
   const handleEditClose = () => {
     setEditModalVisible(false);
     setSelectedManager(null);
+  };
+
+  // local handlers that call parent callbacks and refresh
+  const handleAdd = async (name: string, email: string, password: string, marketId?: number) => {
+    try {
+      const ok = await onAdd(name, email, password, marketId);
+      if (ok) {
+        setAddModalVisible(false);
+        await onRefresh();
+      }
+      return ok;
+    } catch {
+      return false;
+    }
+  };
+
+  const handleEditSubmit = async (id: number, name: string, email: string, password?: string, marketId?: number) => {
+    try {
+      const ok = await onEdit(id, name, email, password, marketId);
+      if (ok) {
+        setEditModalVisible(false);
+        setSelectedManager(null);
+        await onRefresh();
+      }
+      return ok;
+    } catch {
+      return false;
+    }
+  };
+
+  const handleDelete = async (id: number) => {
+    try {
+      const ok = await onDelete(id);
+      if (ok) await onRefresh();
+    } catch {
+      /* ignore */
+    }
   };
 
   return (
@@ -75,7 +113,7 @@ export const ManagersTab: React.FC<ManagersTabProps> = ({
                   />
                   <ActionButton
                     label="Delete"
-                    onPress={async () => { await onDelete(item.id); }}
+                    onPress={async () => { await handleDelete(item.id); }} // use local handler
                     variant="danger"
                     size="small"
                   />
@@ -94,7 +132,7 @@ export const ManagersTab: React.FC<ManagersTabProps> = ({
         visible={addModalVisible}
         markets={markets}
         onClose={handleAddClose}
-        onSubmit={onAdd}
+        onSubmit={handleAdd} // wired to local handler
       />
 
       {selectedManager && (
@@ -103,7 +141,7 @@ export const ManagersTab: React.FC<ManagersTabProps> = ({
           manager={selectedManager}
           markets={markets}
           onClose={handleEditClose}
-          onSubmit={onEdit}
+          onSubmit={handleEditSubmit} // wired to local handler
         />
       )}
     </View>

@@ -144,6 +144,11 @@ export const ConfirmationModal: React.FC = () => {
   );
 };
 
+// Toast container exported for mounting in the app root
+export const ToastContainer: React.FC = () => {
+  return <Toast />;
+};
+
 const styles = StyleSheet.create({
   // Toast Styles
   toastContainer: {

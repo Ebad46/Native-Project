@@ -6,6 +6,8 @@ import {
   SafeAreaView,
   ScrollView,
   ActivityIndicator,
+  Platform,
+  StatusBar,
 } from 'react-native';
 import { useAuth } from '../context/AuthContext';
 import { useAdminData } from '../hooks/useAdminData';
@@ -108,54 +110,61 @@ export const AdminDashboardScreen: React.FC = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Header onLogout={handleLogout} />
+      <View style={styles.contentWrapper}>
+        <Header onLogout={handleLogout} />
 
-      <TabNavigation
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
-        counts={{
-          managers: managers.length,
-          markets: markets.length,
-          stores: stores.length,
-        }}
-      />
+        <TabNavigation
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+          counts={{
+            managers: managers.length,
+            markets: markets.length,
+            stores: stores.length,
+          }}
+        />
 
-      <ScrollView showsVerticalScrollIndicator={false}>
-        {activeTab === 'managers' && (
-          <ManagersTab
-            managers={managers}
-            markets={markets}
-            onAdd={addManager}
-            onEdit={editManager}
-            onDelete={handleDeleteManager}
-            onRefresh={handleRefresh}
-          />
-        )}
+        <ScrollView 
+          style={styles.scrollView}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+          bounces={true}
+        >
+          {activeTab === 'managers' && (
+            <ManagersTab
+              managers={managers}
+              markets={markets}
+              onAdd={addManager}
+              onEdit={editManager}
+              onDelete={handleDeleteManager}
+              onRefresh={handleRefresh}
+            />
+          )}
 
-        {activeTab === 'markets' && (
-          <MarketsTab
-            markets={markets}
-            stores={stores}
-            managers={managers}
-            onAdd={addMarket}
-            onEdit={editMarket}
-            onDelete={handleDeleteMarket}
-            onRefresh={handleRefresh}
-          />
-        )}
+          {activeTab === 'markets' && (
+            <MarketsTab
+              markets={markets}
+              stores={stores}
+              managers={managers}
+              onAdd={addMarket}
+              onEdit={editMarket}
+              onDelete={handleDeleteMarket}
+              onRefresh={handleRefresh}
+            />
+          )}
 
-        {activeTab === 'stores' && (
-          <StoresTab
-            stores={stores}
-            markets={markets}
-            managers={managers}
-            onAdd={addStore}
-            onEdit={editStore}
-            onDelete={handleDeleteStore}
-            onRefresh={handleRefresh}
-          />
-        )}
-      </ScrollView>
+          {activeTab === 'stores' && (
+            <StoresTab
+              stores={stores}
+              markets={markets}
+              managers={managers}
+              onAdd={addStore}
+              onEdit={editStore}
+              onDelete={handleDeleteStore}
+              onRefresh={handleRefresh}
+            />
+          )}
+        </ScrollView>
+      </View>
     </SafeAreaView>
   );
 };
@@ -164,10 +173,23 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f9fafb',
+    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
+  },
+  contentWrapper: {
+    flex: 1,
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    paddingHorizontal: 16,
+    paddingTop: 8,
+    paddingBottom: 24,
   },
 });

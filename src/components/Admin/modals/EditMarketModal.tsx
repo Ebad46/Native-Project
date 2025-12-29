@@ -1,8 +1,8 @@
+import React, { useState, useEffect } from 'react';
+import { Modal, View, Text, SafeAreaView, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { Market } from '../../../types';
-import React, { useState } from 'react';
 import { ActionButton } from '../buttons/ActionButton';
 import { FormInput } from '../inputs/FormInput';
-import { Modal, View, Text, SafeAreaView, ScrollView, TouchableOpacity } from 'react-native';
 import styles from '../styles/adminStyles';
 
 interface EditMarketModalProps {
@@ -19,11 +19,34 @@ export const EditMarketModal: React.FC<EditMarketModalProps> = ({
   onSubmit,
 }) => {
   const [name, setName] = useState(market.name);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Update state when market prop changes
+  useEffect(() => {
+    setName(market.name);
+  }, [market]);
 
   const handleSubmit = async () => {
-    const success = await onSubmit(market.id, name);
-    if (success) {
-      onClose();
+    if (isSubmitting) return;
+    
+    // Basic validation
+    if (!name.trim()) {
+      Alert.alert('Validation Error', 'Please enter a market name');
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const success = await onSubmit(market.id, name.trim());
+      
+      if (success) {
+        onClose();
+      }
+    } catch (error) {
+      console.error('Error updating market:', error);
+      Alert.alert('Error', 'Failed to update market. Please try again.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -31,7 +54,7 @@ export const EditMarketModal: React.FC<EditMarketModalProps> = ({
     <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
       <SafeAreaView style={styles.container}>
         <View style={styles.header}>
-          <TouchableOpacity onPress={onClose}>
+          <TouchableOpacity onPress={onClose} disabled={isSubmitting}>
             <Text style={styles.closeBtn}>Cancel</Text>
           </TouchableOpacity>
           <Text style={styles.title}>Edit Market</Text>
@@ -43,14 +66,16 @@ export const EditMarketModal: React.FC<EditMarketModalProps> = ({
             label="Market Name *"
             value={name}
             onChangeText={setName}
-            placeholder="e.g., North Market"
+            placeholder="Enter market name"
+            editable={!isSubmitting}
           />
 
           <ActionButton
-            label="Save Changes"
+            label={isSubmitting ? "Saving..." : "Save Changes"}
             onPress={handleSubmit}
             variant="primary"
             size="large"
+            disabled={isSubmitting}
           />
         </ScrollView>
       </SafeAreaView>

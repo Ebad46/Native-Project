@@ -237,9 +237,18 @@ const adminStyles = StyleSheet.create({
   },
 
   // ===== MODAL STYLES =====
-  modalContainer: {
+  modalBackdrop: {
     flex: 1,
-    backgroundColor: '#f9fafb',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContainer: {
+    width: '90%',
+    backgroundColor: '#fff',
+    padding: 16,
+    borderRadius: 8,
+    elevation: 4,
   },
   modalHeader: {
     flexDirection: 'row',
@@ -257,12 +266,17 @@ const adminStyles = StyleSheet.create({
     fontWeight: '600',
   },
   modalTitle: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: '600',
-    color: '#1f2937',
+    marginBottom: 12,
   },
   modalContent: {
     padding: 16,
+  },
+  modalActions: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
   },
 
   // ===== TABLE STYLES =====
@@ -445,8 +459,6 @@ closeBtn: {
 },content: {
   flex: 1,
   padding: 16,
-},
-
-});
+}, });
 
 export default adminStyles;

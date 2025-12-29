@@ -4,7 +4,8 @@ import { View, Text, FlatList } from 'react-native';
 import { ActionButton } from '../buttons/ActionButton';
 import { Card } from '../Card';
 import styles from '../styles/adminStyles';
-
+import { AddMarketModal } from '../modals/AddMarketModal';
+import { EditMarketModal } from '../modals/EditMarketModal';
 
 interface MarketsTabProps {
   markets: Market[];
@@ -23,6 +24,7 @@ export const MarketsTab: React.FC<MarketsTabProps> = ({
   onAdd,
   onEdit,
   onDelete,
+  onRefresh,
 }) => {
   const [addModalVisible, setAddModalVisible] = useState(false);
   const [editModalVisible, setEditModalVisible] = useState(false);
@@ -40,6 +42,45 @@ export const MarketsTab: React.FC<MarketsTabProps> = ({
   const handleEditClose = () => {
     setEditModalVisible(false);
     setSelectedMarket(null);
+  };
+
+  // Handler for adding a market
+  const handleAdd = async (name: string) => {
+    try {
+      const ok = await onAdd(name);
+      if (ok) {
+        setAddModalVisible(false);
+        await onRefresh();
+      }
+      return ok;
+    } catch {
+      return false;
+    }
+  };
+
+  // Handler for editing a market
+  const handleEditSubmit = async (id: number, name: string) => {
+    try {
+      const ok = await onEdit(id, name);
+      if (ok) {
+        setEditModalVisible(false);
+        setSelectedMarket(null);
+        await onRefresh();
+      }
+      return ok;
+    } catch {
+      return false;
+    }
+  };
+
+  // Handler for deleting a market
+  const handleDelete = async (id: number) => {
+    try {
+      const ok = await onDelete(id);
+      if (ok) await onRefresh();
+    } catch {
+      /* ignore */
+    }
   };
 
   return (
@@ -76,7 +117,9 @@ export const MarketsTab: React.FC<MarketsTabProps> = ({
                   />
                   <ActionButton
                     label="Delete"
-                    onPress={async () => { await onDelete(item.id); }}
+                    onPress={async () => {
+                      await handleDelete(item.id);
+                    }}
                     variant="danger"
                     size="small"
                   />
@@ -96,7 +139,22 @@ export const MarketsTab: React.FC<MarketsTabProps> = ({
         />
       )}
 
-      {/* Modals will be added next */}
+      {/* Add Market Modal */}
+      <AddMarketModal
+        visible={addModalVisible}
+        onClose={handleAddClose}
+        onSubmit={handleAdd}
+      />
+
+      {/* Edit Market Modal */}
+      {selectedMarket && (
+        <EditMarketModal
+          visible={editModalVisible}
+          onClose={handleEditClose}
+          market={selectedMarket}
+          onSubmit={handleEditSubmit}
+        />
+      )}
     </View>
   );
 };
